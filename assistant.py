@@ -19,7 +19,9 @@ PATTERN_PHONE_NUMBER = re.compile(
         r"(?:\+\d{1,3})?\s*(?:\(\d{2,5}\)|\d{2,5})?"
         r"\s*\d{1,3}(?:\s*-)?\s*\d{1,3}(?:\s*-)?\s*\d{1,3}")
 
-pattern_for_one_name = r"\b\w(?![0-9_])(?:(?<![0-9_])(?:\w|['-])(?![0-9_]))*(:?\w(?![0-9_]))?\b"
+pattern_for_one_name = (r"\b\w(?![0-9_])"
+                        r"(?:(?<![0-9_])(?:\w|['-])(?![0-9_]))*"
+                        r"(:?\w(?![0-9_]))?\b")
 PATTERN_USERNAME = re.compile(pattern_for_one_name
                               + r"(?:\s" + pattern_for_one_name
                               +   r"(?:\s" + pattern_for_one_name + r")?"
@@ -35,7 +37,7 @@ try:
     atexit.register(readline.write_history_file, HISTFILE)
 except FileNotFoundError:
     pass
-except:
+except ModuleNotFoundError:
     pass
 #>>>
 
@@ -46,7 +48,7 @@ def dump_phonebook():
     try:
         with open(PHONEBOOK_PATHFILE, "w") as fh:
             fh.write(json.dumps(g_phone_book, indent=2))
-    except:
+    except PermissionError:
         return
 
 def load_phonebook():
@@ -54,8 +56,10 @@ def load_phonebook():
     try:
         with open(PHONEBOOK_PATHFILE, "r") as fh:
             g_phone_book = json.loads(fh.read())
-    except:
+    except FileNotFoundError:
         g_phone_book = {}
+    except PermissionError:
+        return
 
 def get_name_phone_from_book(name: str):
     name = name.lower()
@@ -78,9 +82,11 @@ def cmd_add(arg: str): # raise ValueError
     arg = arg[mn.end():].lstrip()
     mp = PATTERN_PHONE_NUMBER.search(arg)
     if not bool(mp):
-        raise ValueError("Absent <Phone Number>. Usage format: add <Name> <Phone Number>")
+        raise ValueError("Absent <Phone Number>. Usage format: "
+                         "add <Name> <Phone Number>")
     if mp.start() != 0:
-        raise ValueError(f"Uknown text '{arg[:mp.start()]}' between name and phone number")
+        raise ValueError(f"Uknown text '{arg[:mp.start()]}' "
+                         "between name and phone number")
     if mp.end() != len(arg):
         raise ValueError(f"Uknown text '{arg[mp.end():]}' in the end")
     arg = arg.replace(" - ", "-").replace(" -", "-").replace("- ", "-")
@@ -101,9 +107,11 @@ def cmd_change(arg: str):
     arg = arg[mn.end():].lstrip()
     mp = PATTERN_PHONE_NUMBER.search(arg)
     if not bool(mp):
-        raise ValueError("Absent <Phone Number>. Usage format: change <Name> <Phone Number>")
+        raise ValueError("Absent <Phone Number>. Usage format: "
+                         "change <Name> <Phone Number>")
     if mp.start() != 0:
-        raise ValueError(f"Uknown text '{arg[:mp.start()]}' between name and phone number")
+        raise ValueError(f"Uknown text '{arg[:mp.start()]}' "
+                         "between name and phone number")
     if mp.end() != len(arg):
         raise ValueError(f"Uknown text '{arg[mp.end():]}' in the end")
     arg = arg.replace(" - ", "-").replace(" -", "-").replace("- ", "-")
