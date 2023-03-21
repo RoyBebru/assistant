@@ -28,11 +28,11 @@ PATTERN_USERNAME = re.compile(pattern_for_one_name
                               + r")?", re.IGNORECASE)
 
 
-#<<< Turn on editable possibility in input()
+#<<< Turn on edit possibility in input()
 try:
     import readline
     readline.read_history_file(HISTFILE)
-    # default history len is -1 (infinite), which may grow unruly
+    # Default history len is -1 (infinite), which may grow unruly
     readline.set_history_length(1000)
     atexit.register(readline.write_history_file, HISTFILE)
 except FileNotFoundError:
